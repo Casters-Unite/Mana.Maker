@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mana.Maker</title>
+	<link rel="icon" href="mana.maker.sitefiles/icon.png">
+    <script src="TW.3.4.16.js"></script>
+    <script src="jszip.min.js"></script>
+    <style>
+        /* Custom styles for drag feedback */
+        .file-list-item.dragging {
+            opacity: 0.5;
+            background-color: #e0e7ff; /* Indigo-100 */
+        }
+        .file-list-item.over {
+            border-top: 2px solid #4f46e5; /* Indigo-600 */
+        }
+        /* Style for selected file item */
+        .file-list-item.selected {
+             background-color: #dbeafe; /* Blue-100 */
+             border-color: #2563eb; /* Blue-600 */
+        }
+        /* Basic scrollbar styling */
+         ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        /* Ensure dynamically added inputs have consistent styling + contrast */
+        .dynamic-input-container input[type="text"] {
+             /* Increased background contrast, removed sm:text-sm */
+             @apply mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs bg-gray-100;
+			 background: #eff2f5;
+    border-radius: 5px;
+    border-color: #cacaca;
+    border-width: thin;
+        }
+        .dynamic-input-item {
+            @apply flex items-center space-x-2;
+        }
+         .add-button, .remove-button {
+            @apply p-1 rounded-md text-white transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1;
+         }
+         .add-button {
+             @apply bg-green-500 hover:bg-green-600 focus:ring-green-400;
+         }
+         .remove-button {
+             @apply bg-red-500 hover:bg-red-600 focus:ring-red-400;
+         }
+         .add-button-container {
+             @apply flex items-center space-x-2 mt-1;
+         }
+         /* Style for single value inputs within details section */
+         .details-input {
+             /* Styles based on user feedback/image */
+             @apply mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs bg-gray-100;
+         }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6 md:p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Mana.Maker</h1>
+
+        <div id="tabs" class="flex border-b border-gray-300 mb-6 space-x-1">
+            <button class="tab-button active py-2 px-4 rounded-t-md focus:outline-none" onclick="openTab('ambiance')">Ambiance</button>
+            <button class="tab-button py-2 px-4 rounded-t-md focus:outline-none" onclick="openTab('music')">Music</button>
+            <button class="tab-button py-2 px-4 rounded-t-md focus:outline-none" onclick="openTab('soundfx')">Sound FX</button>
+            <button class="tab-button py-2 px-4 rounded-t-md focus:outline-none" onclick="openTab('packinfo')">Pack Info</button>
+        </div>
+
+        <div id="tab-content">
+            <div id="ambiance" class="tab active space-y-4">
+                <h2 class="text-xl font-semibold text-gray-700">Ambiance Files</h2>
+                <div>
+                    <label for="ambiance-files" class="block text-sm font-medium text-gray-700 mb-1">Add Ambiance Files:</label>
+                    <input type="file" id="ambiance-files" multiple onchange="addFiles('ambiance')" accept="audio/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                </div>
+                <ul id="ambiance-file-list" class="file-list space-y-2 max-h-96 overflow-y-auto p-2 border rounded-md bg-gray-50"></ul>
+            </div>
+
+            <div id="music" class="tab hidden space-y-4">
+                <h2 class="text-xl font-semibold text-gray-700">Music Files</h2>
+                 <div>
+                    <label for="music-files" class="block text-sm font-medium text-gray-700 mb-1">Add Music Files:</label>
+                    <input type="file" id="music-files" multiple onchange="addFiles('music')" accept="audio/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                </div>
+                <ul id="music-file-list" class="file-list space-y-2 max-h-96 overflow-y-auto p-2 border rounded-md bg-gray-50"></ul>
+            </div>
+
+            <div id="soundfx" class="tab hidden space-y-4">
+                <h2 class="text-xl font-semibold text-gray-700">Sound FX Files</h2>
+                 <div>
+                    <label for="soundfx-files" class="block text-sm font-medium text-gray-700 mb-1">Add Sound FX Files:</label>
+                    <input type="file" id="soundfx-files" multiple onchange="addFiles('soundfx')" accept="audio/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                </div>
+                <ul id="soundfx-file-list" class="file-list space-y-2 max-h-96 overflow-y-auto p-2 border rounded-md bg-gray-50"></ul>
+            </div>
+
+            <div id="packinfo" class="tab hidden space-y-4">
+                <h2 class="text-xl font-semibold text-gray-700">Pack Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                    <div>
+                        <label for="pack-icon" class="block text-sm font-medium text-gray-700">Pack Icon (Image URL):</label>
+                        <input type="text" id="pack-icon" name="pack-icon" placeholder="https://example.com/icon.png" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="pack-icon-upload" class="block text-sm font-medium text-gray-700">Or Upload Icon (PNG/JPG):</label>
+                        <input type="file" id="pack-icon-upload" name="pack-icon-upload" accept="image/png, image/jpeg" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="pack-name" class="block text-sm font-medium text-gray-700">Pack Name:</label>
+                        <input type="text" id="pack-name" name="pack-name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                     <div>
+                        <label for="pack-youtube-id" class="block text-sm font-medium text-gray-700">YouTube ID:</label>
+                        <input type="text" id="pack-youtube-id" name="pack-youtube-id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+
+                    <div class="dynamic-input-container">
+                        <label class="block text-sm font-medium text-gray-700">Author(s):</label>
+                        <div id="pack-authors-list" class="space-y-1 mt-1"></div>
+                        <div class="add-button-container">
+                             <button type="button" onclick="addPackInfoInput('pack-authors')" class="add-button text-xs px-2 py-1">Add Author</button>
+                        </div>
+                    </div>
+                    <div class="dynamic-input-container">
+                        <label class="block text-sm font-medium text-gray-700">Artists:</label>
+                        <div id="pack-artists-list" class="space-y-1 mt-1"></div>
+                         <div class="add-button-container">
+                            <button type="button" onclick="addPackInfoInput('pack-artists')" class="add-button text-xs px-2 py-1">Add Artist</button>
+                        </div>
+                    </div>
+                    <div class="dynamic-input-container">
+                        <label class="block text-sm font-medium text-gray-700">Artist Links:</label>
+                        <div id="pack-artist-links-list" class="space-y-1 mt-1"></div>
+                         <div class="add-button-container">
+                            <button type="button" onclick="addPackInfoInput('pack-artist-links')" class="add-button text-xs px-2 py-1">Add Artist Link</button>
+                        </div>
+                    </div>
+                    <div class="dynamic-input-container">
+                        <label class="block text-sm font-medium text-gray-700">Link Names:</label>
+                        <div id="pack-link-names-list" class="space-y-1 mt-1"></div>
+                         <div class="add-button-container">
+                            <button type="button" onclick="addPackInfoInput('pack-link-names')" class="add-button text-xs px-2 py-1">Add Link Name</button>
+                        </div>
+                    </div>
+                     <div class="dynamic-input-container">
+                        <label class="block text-sm font-medium text-gray-700">Links:</label>
+                        <div id="pack-links-list" class="space-y-1 mt-1"></div>
+                         <div class="add-button-container">
+                            <button type="button" onclick="addPackInfoInput('pack-links')" class="add-button text-xs px-2 py-1">Add Link</button>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label for="pack-description" class="block text-sm font-medium text-gray-700">Description:</label>
+                        <textarea id="pack-description" name="pack-description" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 text-center">
+             <button id="export-button" onclick="exportPack()" class="hidden inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Export Pack
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- Constants ---
+        const SEPARATOR_SPECIAL = 'ॐ※†※ॐ';
+        const SEPARATOR_SPACE = ' ';
+
+        // --- State Management ---
+        let ambianceFiles = [];
+        let musicFiles = [];
+        let soundfxFiles = [];
+        let packInfoData = {
+            'pack-authors': [''], 'pack-artists': [''], 'pack-artist-links': [''],
+            'pack-link-names': [''], 'pack-links': ['']
+        };
+        let selectedItems = { ambiance: null, music: null, soundfx: null };
+
+        // --- Tab Management ---
+        function openTab(tabId) {
+            const allTabs = document.querySelectorAll('.tab');
+            const allButtons = document.querySelectorAll('.tab-button');
+            const exportButton = document.getElementById('export-button');
+
+            allTabs.forEach(tab => tab.classList.add('hidden'));
+            allButtons.forEach(button => {
+                button.classList.remove('active', 'bg-white', 'text-indigo-700', 'font-semibold');
+                button.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:bg-gray-50');
+            });
+
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById(tabId).classList.add('active');
+
+            const activeButton = document.querySelector(`.tab-button[onclick="openTab('${tabId}')"]`);
+            activeButton.classList.add('active', 'bg-white', 'text-indigo-700', 'font-semibold');
+            activeButton.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:bg-gray-50');
+
+            exportButton.classList.toggle('hidden', tabId !== 'packinfo');
+        }
+
+        // --- File Handling ---
+        function addFiles(category) {
+            const fileInput = document.getElementById(`${category}-files`);
+            const files = Array.from(fileInput.files);
+            let fileArray;
+
+            if (category === 'ambiance') fileArray = ambianceFiles;
+            else if (category === 'music') fileArray = musicFiles;
+            else fileArray = soundfxFiles;
+
+            files.forEach(file => {
+                 if (!file.type.startsWith('audio/')) {
+                     console.warn(`Skipping non-audio file: ${file.name}`);
+                     return;
+                 }
+                // Initialize dynamic fields with one empty string
+                fileArray.push({
+                    file: file, artists: [''], artistLinks: [''], linksNames: [''],
+                    links: [''], youtubeIds: [''], hueShift: ""
+                });
+            });
+            renderFileList(category); // Render the updated list
+            fileInput.value = ''; // Reset file input
+        }
+
+        // --- Dynamic Input Management ---
+        function renderDynamicInputList(containerId, dataArray, fieldName, updateFunction, removeFunction, category = null, fileIndex = null) {
+            const container = document.getElementById(containerId);
+            if (!container) {
+                console.error("Container not found for dynamic list:", containerId);
+                return;
+            }
+            container.innerHTML = ''; // Clear previous content
+
+            dataArray.forEach((value, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'dynamic-input-item'; // Container for input + remove button
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = value;
+                input.className = 'flex-grow'; // Input takes remaining space
+                // Attach the update function with all necessary context
+                input.oninput = (event) => updateFunction(event.target, fieldName, index, category, fileIndex);
+                itemDiv.appendChild(input);
+
+                // **MODIFIED**: Add remove button only for items *after* the first one (index > 0)
+                if (index > 0) {
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.textContent = '✕'; // Simple 'x' icon
+                    removeBtn.className = 'remove-button text-xs'; // Styling for the button
+                    // Attach the remove function with all necessary context
+                    removeBtn.onclick = () => removeFunction(fieldName, index, category, fileIndex);
+                    itemDiv.appendChild(removeBtn);
+                }
+                container.appendChild(itemDiv); // Add the item (input + optional button) to the list
+            });
+        }
+
+        // --- Pack Info Dynamic Inputs ---
+        function addPackInfoInput(fieldName) {
+            packInfoData[fieldName].push(''); // Add a new empty string to the array
+            renderPackInfoInputs(); // Re-render all pack info inputs
+        }
+        function removePackInfoInput(fieldName, index) {
+            // Only allow removal if it's not the very first item (index > 0 implicitly covered by button logic)
+            // and ensure we don't remove the last item if it's the only one left (index > 0 check is sufficient)
+            packInfoData[fieldName].splice(index, 1); // Remove item at the specified index
+            renderPackInfoInputs(); // Re-render all pack info inputs
+        }
+        function updatePackInfoData(inputElement, fieldName, index) {
+            // Update the corresponding value in the state array
+            packInfoData[fieldName][index] = inputElement.value;
+        }
+        function renderPackInfoInputs() {
+             // Iterate over the keys in packInfoData and render the list for each
+             Object.keys(packInfoData).forEach(fieldName => {
+                 renderDynamicInputList(
+                     `${fieldName}-list`,        // Container ID (e.g., 'pack-authors-list')
+                     packInfoData[fieldName],    // Data array for this field
+                     fieldName,                  // Field name identifier
+                     updatePackInfoData,         // Function to call on input change
+                     removePackInfoInput         // Function to call on remove button click
+                 );
+             });
+        }
+
+        // --- File Detail Dynamic Inputs ---
+        function getFileObject(category, fileIndex) {
+            // Helper to get the correct file object from the state arrays
+            if (category === 'ambiance') return ambianceFiles[fileIndex];
+            if (category === 'music') return musicFiles[fileIndex];
+            if (category === 'soundfx') return soundfxFiles[fileIndex];
+            console.error("Invalid category in getFileObject:", category);
+            return null;
+        }
+
+        function addFileDetailInput(category, fileIndex, fieldName) {
+            const fileObject = getFileObject(category, fileIndex);
+            // Check if the file object and the specific field array exist
+            if (fileObject && fileObject[fieldName]) {
+                fileObject[fieldName].push(''); // Add a new empty string
+                // Re-render only the specific list that changed
+                const listContainerId = `${category}-${fileIndex}-${fieldName}-list`;
+                renderDynamicInputList(
+                    listContainerId, fileObject[fieldName], fieldName,
+                    updateFileDetailData, removeFileDetailInput, category, fileIndex
+                );
+            } else {
+                console.error("Could not add file detail input for:", category, fileIndex, fieldName);
+            }
+        }
+
+        function removeFileDetailInput(fieldName, itemIndex, category, fileIndex) {
+             const fileObject = getFileObject(category, fileIndex);
+             // Check if the file object and field exist, and ensure we don't remove the first item (index > 0)
+             if (fileObject && fileObject[fieldName] && itemIndex > 0) {
+                fileObject[fieldName].splice(itemIndex, 1); // Remove the item
+                // Re-render only the specific list that changed
+                const listContainerId = `${category}-${fileIndex}-${fieldName}-list`;
+                renderDynamicInputList(
+                    listContainerId, fileObject[fieldName], fieldName,
+                    updateFileDetailData, removeFileDetailInput, category, fileIndex
+                );
+            } else {
+                 console.error("Could not remove file detail input for:", category, fileIndex, fieldName, itemIndex);
+            }
+        }
+
+         function updateFileDetailData(inputElement, fieldName, itemIndex, category, fileIndex) {
+            const fileObject = getFileObject(category, fileIndex);
+             // Check if the file object, field, and specific index exist before updating
+             if (fileObject && fileObject[fieldName] && fileObject[fieldName][itemIndex] !== undefined) {
+                 fileObject[fieldName][itemIndex] = inputElement.value; // Update the value in the state array
+             } else {
+                  console.error("Could not update file detail data for:", category, fileIndex, fieldName, itemIndex);
+             }
+         }
+
+        // --- Rendering File List ---
+        function renderFileList(category) {
+            const fileListElement = document.getElementById(`${category}-file-list`);
+            if (!fileListElement) return;
+            fileListElement.innerHTML = ""; // Clear the list
+            selectedItems[category] = null; // Reset selection for this category
+
+            let files;
+            if (category === 'ambiance') files = ambianceFiles;
+            else if (category === 'music') files = musicFiles;
+            else files = soundfxFiles;
+
+            files.forEach((fileObject, index) => {
+                const file = fileObject.file;
+                const listItem = document.createElement("li");
+                listItem.id = `${category}-item-${index}`; // Unique ID for the list item
+                listItem.className = "file-list-item p-3 border border-gray-300 rounded-md bg-white shadow-sm cursor-grab hover:shadow-md transition-shadow duration-150";
+                listItem.draggable = true;
+                listItem.dataset.index = index; // Store index for drag/drop and updates
+                listItem.dataset.category = category; // Store category
+
+                // Header: File name and Remove button
+                 const headerDiv = document.createElement('div');
+                 headerDiv.className = "flex justify-between items-center";
+                 headerDiv.innerHTML = `
+                     <span class="font-medium text-gray-800 truncate pr-2">${file.name}</span>
+                     <button type="button" onclick="removeFile('${category}', ${index})" class="text-red-500 hover:text-red-700 text-xs font-semibold focus:outline-none">Remove</button>
+                 `;
+                 listItem.appendChild(headerDiv);
+
+                 // Details container (initially hidden)
+                 const detailsDiv = document.createElement('div');
+                 detailsDiv.className = "file-details mt-3 pt-3 border-t border-gray-200 space-y-3 hidden";
+                 detailsDiv.id = `${category}-details-${index}`; // Unique ID for details
+
+                 // Define which fields use the dynamic multi-input system
+                 const dynamicFields = [
+                     { name: 'artists', label: 'Artists' }, { name: 'artistLinks', label: 'Artist Links' },
+                     { name: 'linksNames', label: 'Link Names' }, { name: 'links', label: 'Links' },
+                     { name: 'youtubeIds', label: 'Youtube IDs' }
+                 ];
+
+                 // Create sections for each dynamic field
+                 dynamicFields.forEach(fieldInfo => {
+                     const fieldContainer = document.createElement('div');
+                     fieldContainer.className = 'dynamic-input-container'; // Container for label, list, and add button
+                     fieldContainer.innerHTML = `
+                        <label class="block text-xs font-medium text-gray-600">${fieldInfo.label}:</label>
+                        <div id="${category}-${index}-${fieldInfo.name}-list" class="space-y-1 mt-1"></div>
+                        <div class="add-button-container">
+                            <button type="button" onclick="addFileDetailInput('${category}', ${index}, '${fieldInfo.name}')" class="add-button text-xs px-1.5 py-0.5">+</button>
+                        </div>
+                     `;
+                     detailsDiv.appendChild(fieldContainer);
+                     // Initial render of the input list for this field
+                     renderDynamicInputList(
+                         `${category}-${index}-${fieldInfo.name}-list`, // ID of the div to populate
+                         fileObject[fieldInfo.name], // The data array (e.g., fileObject.artists)
+                         fieldInfo.name,             // Field name identifier
+                         updateFileDetailData,       // Update function
+                         removeFileDetailInput,      // Remove function
+                         category,                   // Pass category context
+                         index                       // Pass file index context
+                     );
+                 });
+
+                 // Add Hue Shift (single static input)
+                 const hueShiftDiv = document.createElement('div');
+                 hueShiftDiv.innerHTML = `
+                     <label class="block text-xs font-medium text-gray-600">Hue Shift:</label>
+                     <input type="text" value="${fileObject.hueShift}" oninput="updateSingleFileDetail('${category}', ${index}, 'hueShift', this.value)" class="details-input">
+                 `;
+                 detailsDiv.appendChild(hueShiftDiv);
+                 listItem.appendChild(detailsDiv); // Add details section to list item
+
+                // Event Listeners for the list item itself
+                listItem.addEventListener('click', (e) => {
+                    // Prevent toggling details if the click originated from an interactive element within
+                    if (e.target.closest('button, input, label, a')) {
+                        return;
+                    }
+                    toggleFileDetails(listItem, category); // Toggle visibility otherwise
+                });
+                // Drag and Drop listeners
+                listItem.addEventListener('dragstart', handleDragStart);
+                listItem.addEventListener('dragover', handleDragOver);
+                listItem.addEventListener('drop', handleDrop);
+                listItem.addEventListener('dragenter', handleDragEnter);
+                listItem.addEventListener('dragleave', handleDragLeave);
+                listItem.addEventListener('dragend', handleDragEnd);
+
+                fileListElement.appendChild(listItem); // Add the completed item to the list
+            });
+        }
+
+        // --- Update Single Value File Detail (e.g., Hue Shift) ---
+        function updateSingleFileDetail(category, fileIndex, field, value) {
+            const fileObject = getFileObject(category, fileIndex);
+            if (fileObject) {
+                fileObject[field] = value; // Update the single value field
+            }
+        }
+
+        // --- File Details Toggle ---
+        function toggleFileDetails(listItem, category) {
+            const detailsDiv = listItem.querySelector('.file-details');
+            if (!detailsDiv) return; // Safety check
+            const isSelected = listItem.classList.contains('selected');
+
+            // Deselect previously selected item in the same category
+            if (selectedItems[category] && selectedItems[category] !== listItem) {
+                selectedItems[category].classList.remove('selected', 'border-indigo-500');
+                const prevDetails = selectedItems[category].querySelector('.file-details');
+                if (prevDetails) prevDetails.classList.add('hidden');
+            }
+
+            // Toggle the current item's details visibility and selection style
+            detailsDiv.classList.toggle('hidden', isSelected);
+            listItem.classList.toggle('selected', !isSelected);
+            listItem.classList.toggle('border-indigo-500', !isSelected);
+
+            // Update the tracker for the selected item
+            selectedItems[category] = isSelected ? null : listItem;
+        }
+
+         // --- Remove File from the list ---
+        function removeFile(category, index) {
+            let files;
+            if (category === 'ambiance') files = ambianceFiles;
+            else if (category === 'music') files = musicFiles;
+            else files = soundfxFiles;
+            files.splice(index, 1); // Remove from the state array
+            renderFileList(category); // Re-render the list for this category
+        }
+
+        // --- Drag and Drop Handling ---
+        let dragSrcEl = null; // Element being dragged
+        function handleDragStart(e) {
+            dragSrcEl = this;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', this.dataset.index); // Use index as data
+            this.classList.add('dragging'); // Style for dragging element
+        }
+        function handleDragOver(e) {
+            if (e.preventDefault) e.preventDefault(); // Allow drop
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+        function handleDragEnter(e) {
+            // Add highlight only if dragging over a different item in the same list
+            if (dragSrcEl !== this && dragSrcEl.dataset.category === this.dataset.category) {
+                this.classList.add('over');
+            }
+        }
+        function handleDragLeave(e) {
+            this.classList.remove('over'); // Remove highlight
+        }
+        function handleDrop(e) {
+             if (e.stopPropagation) e.stopPropagation(); // Prevent redirection
+             // Don't drop on self or items in different categories
+             if (dragSrcEl === this || dragSrcEl.dataset.category !== this.dataset.category) {
+                 this.classList.remove('over');
+                 return false;
+             }
+             const category = this.dataset.category;
+             let files; // Get the correct state array
+             if (category === 'ambiance') files = ambianceFiles;
+             else if (category === 'music') files = musicFiles;
+             else files = soundfxFiles;
+
+             const dragIndex = parseInt(dragSrcEl.dataset.index); // Original index
+             const dropIndex = parseInt(this.dataset.index);   // Target index
+
+             // Reorder the state array
+             const draggedItem = files.splice(dragIndex, 1)[0]; // Remove dragged item
+             files.splice(dropIndex, 0, draggedItem);          // Insert at drop position
+
+             renderFileList(category); // Re-render the list to reflect new order and update indices
+             this.classList.remove('over'); // Clean up drop target style
+             return false;
+        }
+        function handleDragEnd(e) {
+            // Clean up dragging styles from all items in the list
+            const listItems = document.querySelectorAll(`#${this.dataset.category}-file-list .file-list-item`);
+            listItems.forEach(item => item.classList.remove('dragging', 'over'));
+        }
+
+        // --- Export Logic ---
+        function exportPack() {
+            // Gather Pack Info Data (static and dynamic)
+            const packIconURL = document.getElementById('pack-icon').value.trim();
+            const packIconUploadInput = document.getElementById('pack-icon-upload');
+            const packIconUpload = packIconUploadInput.files[0];
+            const packName = document.getElementById('pack-name').value.trim() || 'MySoundPack'; // Default if empty
+            const packYoutubeID = document.getElementById('pack-youtube-id').value.trim();
+            const packDescription = document.getElementById('pack-description').value;
+            // Join dynamic fields, filtering out empty strings
+            const packAuthors = packInfoData['pack-authors'].filter(v => v.trim() !== '').join(SEPARATOR_SPECIAL);
+            const packArtists = packInfoData['pack-artists'].filter(v => v.trim() !== '').join(SEPARATOR_SPECIAL);
+            const packArtistLinks = packInfoData['pack-artist-links'].filter(v => v.trim() !== '').join(SEPARATOR_SPACE);
+            const packLinkNames = packInfoData['pack-link-names'].filter(v => v.trim() !== '').join(SEPARATOR_SPECIAL);
+            const packLinks = packInfoData['pack-links'].filter(v => v.trim() !== '').join(SEPARATOR_SPACE);
+
+            // Validation
+            if (!packName) { alert("Please enter a Pack Name."); openTab('packinfo'); document.getElementById('pack-name').focus(); return; }
+            if (!packIconURL && !packIconUpload) { alert("Please provide a Pack Icon URL or upload an icon file."); openTab('packinfo'); document.getElementById('pack-icon').focus(); return; }
+            if (packIconUpload && !['image/png', 'image/jpeg'].includes(packIconUpload.type)) { alert("Please upload a PNG or JPG file for the pack icon."); openTab('packinfo'); packIconUploadInput.value = ''; return; }
+
+            // Determine icon path within the zip
+            let iconPathInDunpk = packIconURL;
+            if (packIconUpload) {
+                const extension = packIconUpload.name.split('.').pop().toLowerCase();
+                iconPathInDunpk = `pack.${extension === 'jpg' ? 'jpg' : 'png'}`; // Standardize name
+            }
+
+            // Construct DUNPK Content String
+            let dunpkContent = `// Multi-value fields separated by appropriate characters.
+INIT
+{
+"IconURL":"${iconPathInDunpk}", "PackName":"${packName}", "Authers":"${packAuthors}",
+"Artists":"${packArtists}", "ArtistsLinks":"${packArtistLinks}", "LinksNames":"${packLinkNames}",
+"Links":"${packLinks}", "YouTubeID":"${packYoutubeID}", "Description":"${packDescription}",
+"DarkMode?":"True"
+}
+INIT
+-
+*A*
+${createAudioData(ambianceFiles, 'A')}
+*A*
+-
+*M*
+${createAudioData(musicFiles, 'M')}
+*M*
+-
+*SFX*
+${createAudioData(soundfxFiles, 'SFX')}
+*SFX*`;
+
+            // Prepare and Download ZIP
+            try {
+                const zip = new JSZip(); // Initialize JSZip
+                // Create folder structure
+                const assetsFolder = zip.folder("assets");
+                const aFolder = assetsFolder.folder("A");
+                const mFolder = assetsFolder.folder("M");
+                const sfxFolder = assetsFolder.folder("SFX");
+
+                // Add audio files to respective folders
+                ambianceFiles.forEach(fo => aFolder.file(fo.file.name, fo.file));
+                musicFiles.forEach(fo => mFolder.file(fo.file.name, fo.file));
+                soundfxFiles.forEach(fo => sfxFolder.file(fo.file.name, fo.file));
+
+                // Add icon file if uploaded
+                if (packIconUpload) zip.file(iconPathInDunpk, packIconUpload);
+                // Add the main definition file
+                zip.file("Mana.DUNPK", dunpkContent);
+
+                // Generate the ZIP file asynchronously
+                zip.generateAsync({ type: "blob" })
+                    .then(blob => {
+                        // Create a download link
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.style.display = 'none'; a.href = url;
+                        // Sanitize pack name for use in filename
+                        const safePackName = packName.replace(/[^a-z0-9_\-]/gi, '_');
+                        a.download = `${safePackName}.zip`; // Set filename with .zip extension
+                        document.body.appendChild(a);
+                        a.click(); // Trigger download
+                        // Clean up
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        console.log("Pack exported successfully!");
+                    })
+                    .catch(err => { console.error("Error generating ZIP file:", err); alert("Error creating the pack file."); });
+            } catch (err) { console.error("Error initializing JSZip:", err); alert("An error occurred during pack creation."); }
+        }
+
+        // Helper function to create audio data part for DUNPK file
+        function createAudioData(files, folder) {
+            if (!files || files.length === 0) return '{}'; // Return empty object if no files
+            let audioData = '{';
+            files.forEach((fo, index) => {
+                const fileIndex = index + 1; // DUNPK uses 1-based indexing
+                // Helper to escape double quotes in strings
+                const escape = (str) => str ? str.replace(/"/g, '\\"') : '';
+                // Join array fields, filtering empty values first
+                const artists = fo.artists.filter(v => v.trim() !== '').join(SEPARATOR_SPECIAL);
+                const artistLinks = fo.artistLinks.filter(v => v.trim() !== '').join(SEPARATOR_SPACE);
+                const linksNames = fo.linksNames.filter(v => v.trim() !== '').join(SEPARATOR_SPECIAL);
+                const links = fo.links.filter(v => v.trim() !== '').join(SEPARATOR_SPACE);
+                const ytIds = fo.youtubeIds.filter(v => v.trim() !== '').join(SEPARATOR_SPACE);
+                // Append data for this file to the string
+                audioData += `
+"${fileIndex}":"assets/${folder}/${escape(fo.file.name)}", "${fileIndex}ARTISTS":"${escape(artists)}",
+"${fileIndex}ARTISTSLINKS":"${escape(artistLinks)}", "${fileIndex}LINKSNAMES":"${escape(linksNames)}",
+"${fileIndex}LINKS":"${escape(links)}", "${fileIndex}YTIDS":"${escape(ytIds)}",
+"${fileIndex}HUE":"${escape(fo.hueShift)}"${index === files.length - 1 ? '' : ','}`; // Add comma except for last item
+            });
+            audioData += '\n}'; // Closing brace
+            return audioData;
+        }
+
+        // --- Initial Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+            openTab('ambiance'); // Set initial tab
+            renderPackInfoInputs(); // Render initial dynamic inputs for Pack Info
+            // Render initial (empty) file lists
+            renderFileList('ambiance');
+            renderFileList('music');
+            renderFileList('soundfx');
+        });
+
+    </script>
+
+</body>
+</html>
