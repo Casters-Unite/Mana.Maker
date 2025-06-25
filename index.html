@@ -8,6 +8,28 @@
     <script src="TW.3.4.16.js"></script>
     <script src="jszip.min.js"></script>
     <style>
+		html {
+		filter: grayscale(71%) brightness(85%) saturate(85%) contrast(258%);
+		-webkit-filter: grayscale(71%) brightness(85%) saturate(85%) contrast(258%);
+		-moz-filter: grayscale(71%) brightness(85%) saturate(85%) contrast(258%);
+		}
+
+		body {
+		background-color: #A7A7A8;
+		}
+	
+		.full {
+		filter: invert(.25);
+		width: 100%;
+		height: 100%;
+		}
+		
+		.main {
+		background-color: #FFF;
+		}
+		
+		input {cursor: pointer;}
+	
         /* Custom styles for drag feedback */
         .file-list-item.dragging {
             opacity: 0.5;
@@ -67,10 +89,10 @@
          }
     </style>
 </head>
-<body class="bg-gray-100 font-sans p-4 md:p-8">
-
-    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6 md:p-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Mana.Maker</h1>
+<div class="full">
+<body class="font-sans p-4 md:p-8">
+    <div class="main max-w-4xl mx-auto rounded-lg shadow-lg p-6 md:p-8 border border-solid border-grey-400 " style="">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6 text-center">Mana.Maker</h1>
 
         <div id="tabs" class="flex border-b border-gray-300 mb-6 space-x-1">
             <button class="tab-button active py-2 px-4 rounded-t-md focus:outline-none" onclick="openTab('ambiance')">Ambiance</button>
@@ -81,82 +103,82 @@
 
         <div id="tab-content">
             <div id="ambiance" class="tab active space-y-4">
-                <h2 class="text-xl font-semibold text-gray-700">Ambiance Files</h2>
+                <h2 class="text-xl font-semibold text-gray-900">Ambiance Files</h2>
                 <div>
-                    <label for="ambiance-files" class="block text-sm font-medium text-gray-700 mb-1">Add Ambiance Files:</label>
-                    <input type="file" id="ambiance-files" multiple onchange="addFiles('ambiance')" accept="audio/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                    <label for="ambiance-files" class="block text-sm font-medium text-gray-900 mb-1">Add Ambiance Files:</label>
+                    <input type="file" id="ambiance-files" multiple onchange="addFiles('ambiance')" accept="audio/*" class="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
                 </div>
                 <ul id="ambiance-file-list" class="file-list space-y-2 max-h-96 overflow-y-auto p-2 border rounded-md bg-gray-50"></ul>
             </div>
 
             <div id="music" class="tab hidden space-y-4">
-                <h2 class="text-xl font-semibold text-gray-700">Music Files</h2>
+                <h2 class="text-xl font-semibold text-gray-900">Music Files</h2>
                  <div>
-                    <label for="music-files" class="block text-sm font-medium text-gray-700 mb-1">Add Music Files:</label>
-                    <input type="file" id="music-files" multiple onchange="addFiles('music')" accept="audio/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                    <label for="music-files" class="block text-sm font-medium text-gray-900 mb-1">Add Music Files:</label>
+                    <input type="file" id="music-files" multiple onchange="addFiles('music')" accept="audio/*" class="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
                 </div>
                 <ul id="music-file-list" class="file-list space-y-2 max-h-96 overflow-y-auto p-2 border rounded-md bg-gray-50"></ul>
             </div>
 
             <div id="soundfx" class="tab hidden space-y-4">
-                <h2 class="text-xl font-semibold text-gray-700">Sound FX Files</h2>
+                <h2 class="text-xl font-semibold text-gray-900">Sound FX Files</h2>
                  <div>
-                    <label for="soundfx-files" class="block text-sm font-medium text-gray-700 mb-1">Add Sound FX Files:</label>
-                    <input type="file" id="soundfx-files" multiple onchange="addFiles('soundfx')" accept="audio/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                    <label for="soundfx-files" class="block text-sm font-medium text-gray-900 mb-1">Add Sound FX Files:</label>
+                    <input type="file" id="soundfx-files" multiple onchange="addFiles('soundfx')" accept="audio/*" class="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
                 </div>
                 <ul id="soundfx-file-list" class="file-list space-y-2 max-h-96 overflow-y-auto p-2 border rounded-md bg-gray-50"></ul>
             </div>
 
             <div id="packinfo" class="tab hidden space-y-4">
-                <h2 class="text-xl font-semibold text-gray-700">Pack Information</h2>
+                <h2 class="text-xl font-semibold text-gray-900">Pack Information</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     <div>
-                        <label for="pack-icon" class="block text-sm font-medium text-gray-700">Pack Icon (Image URL):</label>
+                        <label for="pack-icon" class="block text-sm font-medium text-gray-900">Pack Icon (Image URL):</label>
                         <input type="text" id="pack-icon" name="pack-icon" placeholder="https://example.com/icon.png" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
                     <div>
-                        <label for="pack-icon-upload" class="block text-sm font-medium text-gray-700">Or Upload Icon (PNG/JPG):</label>
-                        <input type="file" id="pack-icon-upload" name="pack-icon-upload" accept="image/png, image/jpeg" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                        <label for="pack-icon-upload" class="block text-sm font-medium text-gray-900">Or Upload Icon (PNG/JPG):</label>
+                        <input type="file" id="pack-icon-upload" name="pack-icon-upload" accept="image/png, image/jpeg, image/gif, image/webp, image/bmp, image/tiff, image/x-icon, image/svg+xml, image/apng, image/avif, image/heif, image/heic, image/jxl" class="mt-1 block w-full text-sm text-gray-900 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
                     </div>
                     <div>
-                        <label for="pack-name" class="block text-sm font-medium text-gray-700">Pack Name:</label>
+                        <label for="pack-name" class="block text-sm font-medium text-gray-900">Pack Name:</label>
                         <input type="text" id="pack-name" name="pack-name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
                      <div>
-                        <label for="pack-youtube-id" class="block text-sm font-medium text-gray-700">YouTube ID:</label>
+                        <label for="pack-youtube-id" class="block text-sm font-medium text-gray-900">YouTube ID:</label>
                         <input type="text" id="pack-youtube-id" name="pack-youtube-id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
 
                     <div class="dynamic-input-container">
-                        <label class="block text-sm font-medium text-gray-700">Author(s):</label>
+                        <label class="block text-sm font-medium text-gray-900">Author(s):</label>
                         <div id="pack-authors-list" class="space-y-1 mt-1"></div>
                         <div class="add-button-container">
                              <button type="button" onclick="addPackInfoInput('pack-authors')" class="add-button text-xs px-2 py-1">Add Author</button>
                         </div>
                     </div>
                     <div class="dynamic-input-container">
-                        <label class="block text-sm font-medium text-gray-700">Artists:</label>
+                        <label class="block text-sm font-medium text-gray-900">Artists:</label>
                         <div id="pack-artists-list" class="space-y-1 mt-1"></div>
                          <div class="add-button-container">
                             <button type="button" onclick="addPackInfoInput('pack-artists')" class="add-button text-xs px-2 py-1">Add Artist</button>
                         </div>
                     </div>
                     <div class="dynamic-input-container">
-                        <label class="block text-sm font-medium text-gray-700">Artist Links:</label>
+                        <label class="block text-sm font-medium text-gray-900">Artist Links:</label>
                         <div id="pack-artist-links-list" class="space-y-1 mt-1"></div>
                          <div class="add-button-container">
                             <button type="button" onclick="addPackInfoInput('pack-artist-links')" class="add-button text-xs px-2 py-1">Add Artist Link</button>
                         </div>
                     </div>
                     <div class="dynamic-input-container">
-                        <label class="block text-sm font-medium text-gray-700">Link Names:</label>
+                        <label class="block text-sm font-medium text-gray-900">Link Names:</label>
                         <div id="pack-link-names-list" class="space-y-1 mt-1"></div>
                          <div class="add-button-container">
                             <button type="button" onclick="addPackInfoInput('pack-link-names')" class="add-button text-xs px-2 py-1">Add Link Name</button>
                         </div>
                     </div>
                      <div class="dynamic-input-container">
-                        <label class="block text-sm font-medium text-gray-700">Links:</label>
+                        <label class="block text-sm font-medium text-gray-900">Links:</label>
                         <div id="pack-links-list" class="space-y-1 mt-1"></div>
                          <div class="add-button-container">
                             <button type="button" onclick="addPackInfoInput('pack-links')" class="add-button text-xs px-2 py-1">Add Link</button>
@@ -164,11 +186,12 @@
                     </div>
 
                     <div class="md:col-span-2">
-                        <label for="pack-description" class="block text-sm font-medium text-gray-700">Description:</label>
+                        <label for="pack-description" class="block text-sm font-medium text-gray-900">Description:</label>
                         <textarea id="pack-description" name="pack-description" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
                     </div>
                 </div>
             </div>
+			<sub style="color: #261C1C">I reccomend only using small files currently, as the player will suck up your ram with larger ones.</sub>
         </div>
 
         <div class="mt-6 text-center">
@@ -202,7 +225,7 @@
             allTabs.forEach(tab => tab.classList.add('hidden'));
             allButtons.forEach(button => {
                 button.classList.remove('active', 'bg-white', 'text-indigo-700', 'font-semibold');
-                button.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:bg-gray-50');
+                button.classList.add('text-gray-900', 'hover:text-gray-900', 'hover:bg-gray-50');
             });
 
             document.getElementById(tabId).classList.remove('hidden');
@@ -210,7 +233,7 @@
 
             const activeButton = document.querySelector(`.tab-button[onclick="openTab('${tabId}')"]`);
             activeButton.classList.add('active', 'bg-white', 'text-indigo-700', 'font-semibold');
-            activeButton.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:bg-gray-50');
+            activeButton.classList.remove('text-gray-900', 'hover:text-gray-900', 'hover:bg-gray-50');
 
             exportButton.classList.toggle('hidden', tabId !== 'packinfo');
         }
@@ -380,8 +403,8 @@
                  const headerDiv = document.createElement('div');
                  headerDiv.className = "flex justify-between items-center";
                  headerDiv.innerHTML = `
-                     <span class="font-medium text-gray-800 truncate pr-2">${file.name}</span>
-                     <button type="button" onclick="removeFile('${category}', ${index})" class="text-red-500 hover:text-red-700 text-xs font-semibold focus:outline-none">Remove</button>
+                     <span class="font-medium text-gray-900 truncate pr-2">${file.name}</span>
+                     <button type="button" onclick="removeFile('${category}', ${index})" class="text-red-500 hover:text-red-700 text-xl font-bold focus:outline-5"><null style="padding: 5px; background-color: rgba(0,0,0,0); border-radius: 5px; border-width: 0px; width: 25px; height 16px;">×</null></button>
                  `;
                  listItem.appendChild(headerDiv);
 
@@ -669,6 +692,8 @@ ${createAudioData(soundfxFiles, 'SFX')}
         });
 
     </script>
+	<script src="audio/noise.js"></script>
 
 </body>
+</div>
 </html>
